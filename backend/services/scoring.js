@@ -3,6 +3,7 @@ import calcularPercentil from './percentil.js';
 const creationRawCache = new Map();
 const shootingRawCache = new Map();
 const defenseRawCache = new Map();
+const duelRawCache = new Map();
 
 
 /* ========= HELPERS ========= */
@@ -123,4 +124,51 @@ export function getDefenseRaw(playerId) {
 
 export function getDefenseUniverso(ids) {
   return ids.map(id => getDefenseRaw(id));
+}
+
+
+/* ========= DUELOS ========= */
+
+
+export function buildDuelRaw(player) {
+  const minutes = getMinutes(player);
+
+  if (minutes < 100) {
+    duelRawCache.set(player.player_id, 0);
+    return;
+  }
+
+  const totalDuels =
+    (player.duelWon || 0) +
+    (player.duelLost || 0);
+
+  const aerialTotal =
+    (player.aerialWon || 0) +
+    (player.aerialLost || 0);
+
+  const groundSuccess =
+    totalDuels > 5
+      ? player.duelWon / totalDuels
+      : 0;
+
+  const aerialSuccess =
+    aerialTotal > 3
+      ? player.aerialWon / aerialTotal
+      : 0;
+
+  const raw =
+    per90(player.duelWon, minutes) * 0.4 +      // volume geral
+    groundSuccess * 0.2 +                   // eficiência no chão
+    aerialSuccess * 0.2 +                   // eficiência aérea
+    per90(player.aerialWon, minutes) * 0.4; // presença aérea real
+
+  duelRawCache.set(player.player_id, raw);
+}
+
+export function getDuelRaw(playerId) {
+  return duelRawCache.get(playerId) ?? 0;
+}
+
+export function getDuelUniverso(ids) {
+  return ids.map(id => getDuelRaw(id));
 }
