@@ -5,10 +5,12 @@ import {
   getShootingRaw,
   getDefenseRaw,
   getDuelRaw,
+  getPassRaw,
   getCreationUniverso,
   getShootingUniverso,
   getDefenseUniverso,
-  getDuelUniverso
+  getDuelUniverso,
+  getPassUniverso
 } from '../services/scoring.js';
 
 // ==============================
@@ -44,8 +46,14 @@ function filtrarUniversoDefesa(universo) {
   );
 }
 
-// 🔥 NOVO — universo de Duelo
 function filtrarUniversoDuelo(universo) {
+  return universo.filter(p =>
+    Number(p.minutesPlayed ?? p.minutes ?? 0) >= 500 &&
+    ['D', 'M', 'F'].includes(p.posicao)
+  );
+}
+
+function filtrarUniversoPasse(universo) {
   return universo.filter(p =>
     Number(p.minutesPlayed ?? p.minutes ?? 0) >= 500 &&
     ['D', 'M', 'F'].includes(p.posicao)
@@ -62,12 +70,14 @@ export default function calcularRadar(player, universo, metrics) {
   const universoFinalizacao = filtrarUniversoFinalizacao(universo);
   const universoDefesa = filtrarUniversoDefesa(universo);
   const universoDuelo = filtrarUniversoDuelo(universo);
+  const universoPasse = filtrarUniversoPasse(universo);
 
   // ===== RAW do player =====
   const creationRawPlayer = getCreationRaw(player.player_id);
   const shootingRawPlayer = getShootingRaw(player.player_id);
   const defenseRawPlayer = getDefenseRaw(player.player_id);
   const duelRawPlayer = getDuelRaw(player.player_id);
+  const passRawPlayer = getPassRaw(player.player_id);
 
   // ===== RAW do universo =====
   const creationRawUniverso = getCreationUniverso(
@@ -84,6 +94,10 @@ export default function calcularRadar(player, universo, metrics) {
 
   const duelRawUniverso = getDuelUniverso(
     universoDuelo.map(p => p.player_id)
+  );
+
+  const passRawUniverso = getPassUniverso(
+    universoPasse.map(p => p.player_id)
   );
 
   // ==============================
@@ -117,6 +131,13 @@ export default function calcularRadar(player, universo, metrics) {
       return calcularPercentil(
         duelRawPlayer,
         duelRawUniverso
+      );
+    }
+
+    if (label === 'passe') {
+      return calcularPercentil(
+        passRawPlayer,
+        passRawUniverso
       );
     }
 

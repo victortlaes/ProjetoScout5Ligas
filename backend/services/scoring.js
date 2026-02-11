@@ -4,6 +4,7 @@ const creationRawCache = new Map();
 const shootingRawCache = new Map();
 const defenseRawCache = new Map();
 const duelRawCache = new Map();
+const passRawCache = new Map();
 
 
 /* ========= HELPERS ========= */
@@ -147,7 +148,7 @@ export function buildDuelRaw(player) {
     (player.aerialLost || 0);
 
   const groundSuccess =
-    totalDuels > 5
+    totalDuels - aerialTotal > 5
       ? player.duelWon / totalDuels
       : 0;
 
@@ -171,4 +172,43 @@ export function getDuelRaw(playerId) {
 
 export function getDuelUniverso(ids) {
   return ids.map(id => getDuelRaw(id));
+}
+
+
+/* ========= PASSES ========= */
+
+
+export function buildPassRaw(player) {
+  const minutes = getMinutes(player);
+
+  if (minutes < 300) {
+    passRawCache.set(player.player_id, 0);
+    return;
+  }
+
+  const totalPass = player.totalPass || 0;
+  const accuratePass = player.accuratePass || 0;
+  const accurateLongBalls = player.accurateLongBalls || 0;
+  const keyPass = player.keyPass || 0;
+
+  const passAccuracy =
+    totalPass > 20
+      ? accuratePass / totalPass
+      : 0;
+
+  const raw =
+    passAccuracy * 0.25 +       // eficiência
+    per90(totalPass, minutes) * 0.01 +       // volume
+    per90(accurateLongBalls, minutes) * 0.2 +       // qualidade longa
+    per90(keyPass, minutes) * 0.5;      // impacto criativo
+
+  passRawCache.set(player.player_id, raw);
+}
+
+export function getPassRaw(playerId) {
+  return passRawCache.get(playerId) ?? 0;
+}
+
+export function getPassUniverso(ids) {
+  return ids.map(id => getPassRaw(id));
 }
