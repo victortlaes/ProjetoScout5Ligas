@@ -6,11 +6,13 @@ import {
   getDefenseRaw,
   getDuelRaw,
   getPassRaw,
+  getProgressionRaw,
   getCreationUniverso,
   getShootingUniverso,
   getDefenseUniverso,
   getDuelUniverso,
-  getPassUniverso
+  getPassUniverso,
+  getProgressionUniverso
 } from '../services/scoring.js';
 
 // ==============================
@@ -27,14 +29,14 @@ function media(player, keys) {
 
 function filtrarUniversoCriacao(universo) {
   return universo.filter(p =>
-    Number(p.minutesPlayed ?? p.minutes ?? 0) >= 300 &&
+    Number(p.minutesPlayed ?? p.minutes ?? 0) >= 500 &&
     ['M', 'F'].includes(p.posicao)
   );
 }
 
 function filtrarUniversoFinalizacao(universo) {
   return universo.filter(p =>
-    Number(p.minutesPlayed ?? p.minutes ?? 0) >= 300 &&
+    Number(p.minutesPlayed ?? p.minutes ?? 0) >= 500 &&
     ['F'].includes(p.posicao)
   );
 }
@@ -60,6 +62,14 @@ function filtrarUniversoPasse(universo) {
   );
 }
 
+function filtrarUniversoProgressao(universo, player) {
+  return universo.filter(p =>
+    Number(p.minutesPlayed ?? p.minutes ?? 0) >= 500 &&
+    ['D', 'M', 'F'].includes(p.posicao)
+
+  );
+}
+
 // ==============================
 // Radar principal
 // ==============================
@@ -71,6 +81,7 @@ export default function calcularRadar(player, universo, metrics) {
   const universoDefesa = filtrarUniversoDefesa(universo);
   const universoDuelo = filtrarUniversoDuelo(universo);
   const universoPasse = filtrarUniversoPasse(universo);
+  const universoProgressao = filtrarUniversoProgressao(universo, player);
 
   // ===== RAW do player =====
   const creationRawPlayer = getCreationRaw(player.player_id);
@@ -78,6 +89,7 @@ export default function calcularRadar(player, universo, metrics) {
   const defenseRawPlayer = getDefenseRaw(player.player_id);
   const duelRawPlayer = getDuelRaw(player.player_id);
   const passRawPlayer = getPassRaw(player.player_id);
+  const progressionRawPlayer = getProgressionRaw(player.player_id);
 
   // ===== RAW do universo =====
   const creationRawUniverso = getCreationUniverso(
@@ -100,48 +112,36 @@ export default function calcularRadar(player, universo, metrics) {
     universoPasse.map(p => p.player_id)
   );
 
-  // ==============================
-  // Construção do radar
-  // ==============================
+  const progressionRawUniverso = getProgressionUniverso(
+    universoProgressao.map(p => p.player_id)
+  );
 
   return Object.entries(metrics).map(([label, keys]) => {
 
     if (label === 'criacao') {
-      return calcularPercentil(
-        creationRawPlayer,
-        creationRawUniverso
-      );
+      return calcularPercentil(creationRawPlayer, creationRawUniverso);
     }
 
     if (label === 'finalizacao') {
-      return calcularPercentil(
-        shootingRawPlayer,
-        shootingRawUniverso
-      );
+      return calcularPercentil(shootingRawPlayer, shootingRawUniverso);
     }
 
     if (label === 'defesa') {
-      return calcularPercentil(
-        defenseRawPlayer,
-        defenseRawUniverso
-      );
+      return calcularPercentil(defenseRawPlayer, defenseRawUniverso);
     }
 
     if (label === 'duelo') {
-      return calcularPercentil(
-        duelRawPlayer,
-        duelRawUniverso
-      );
+      return calcularPercentil(duelRawPlayer, duelRawUniverso);
     }
 
     if (label === 'passe') {
-      return calcularPercentil(
-        passRawPlayer,
-        passRawUniverso
-      );
+      return calcularPercentil(passRawPlayer, passRawUniverso);
     }
 
-    // ===== fallback genérico =====
+    if (label === 'progressao') {
+      return calcularPercentil(progressionRawPlayer, progressionRawUniverso);
+    }
+
     const valoresUniverso = universo.map(p => media(p, keys));
     const valorPlayer = media(player, keys);
 

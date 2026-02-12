@@ -5,6 +5,7 @@ const shootingRawCache = new Map();
 const defenseRawCache = new Map();
 const duelRawCache = new Map();
 const passRawCache = new Map();
+const progressionRawCache = new Map();
 
 
 /* ========= HELPERS ========= */
@@ -28,11 +29,50 @@ function getMinutes(player) {
 export function buildCreationRaw(player) {
   const minutes = getMinutes(player);
 
+  const crossAccuracy =
+    player.totalCross > 5
+      ? player.accurateCross / player.totalCross
+      : 0;
+
   const raw =
     per90(player.expectedAssists, minutes) * 0.1 +
-    per90(player.bigChanceCreated, minutes) * 0.4 +
-    per90(player.goalAssist, minutes) * 0.5;
+    per90(player.bigChanceCreated, minutes) * 0.45 +
+    per90(player.goalAssist, minutes) * 0.5
+    crossAccuracy * 0.1;
+   
+/* if (player.nome ==="Nenê" || player.nome === "Nuno Moreira") {
+console.log("Jogador:", player.nome);
 
+console.log(
+  "xA bruto:", player.expectedAssists,
+  "| xA per90:", per90(player.expectedAssists, minutes),
+  "| xA weighted:", per90(player.expectedAssists, minutes) * 0.1
+);
+
+console.log(
+  "BigChance bruto:", player.bigChanceCreated,
+  "| BigChance per90:", per90(player.bigChanceCreated, minutes),
+  "| BigChance weighted:", per90(player.bigChanceCreated, minutes) * 0.4
+);
+
+console.log(
+  "Assist bruto:", player.goalAssist,
+  "| Assist per90:", per90(player.goalAssist, minutes),
+  "| Assist weighted:", per90(player.goalAssist, minutes) * 0.5
+);
+
+console.log(
+  "Cross accuracy:",
+  player.totalCross > 5
+    ? player.accurateCross / player.totalCross
+    : 0,
+  "| Cross weighted:",
+  (player.totalCross > 5
+    ? player.accurateCross / player.totalCross
+    : 0) * 0.1
+);
+console.log("Criação RAW:", raw); 
+}*/
   creationRawCache.set(player.player_id, raw);
 }
 
@@ -111,11 +151,11 @@ export function buildDefenseRaw(player) {
     //-per90(player.errorLeadToAShot, minutes) * 1
   );
 
-  
+  /* 
     if(player.nome === "Robert Arboleda" || player.nome === "Ayrton Lucas" || player.nome === "Léo Pereira" || player.nome === "Léo Ortiz"){ 
       console.log('Defesa RAW', player.nome, raw);
       console.log("Won Tackle: ",wonTackleX, per90(wonTackleX, minutes) * 0.2, "Interceptions: ", player.interceptionWon, per90(player.interceptionWon, minutes) * 0.2, "Clearances: ", player.totalClearance, per90(player.totalClearance, minutes) * 0.1, "Tackle Success: ", tackleSuccess, "Ball Recovery: ", player.ballRecovery, per90(player.ballRecovery, minutes) * 0.3, "Challenge Lost: ", player.challengeLost, per90(player.challengeLost, minutes) * 0.3);
-    }
+    } */
   defenseRawCache.set(player.player_id, raw);
 }
 
@@ -211,4 +251,49 @@ export function getPassRaw(playerId) {
 
 export function getPassUniverso(ids) {
   return ids.map(id => getPassRaw(id));
+}
+
+/* ========= PROGRESSÃO ========= */
+
+
+
+export function buildProgressionRaw(player) {
+  const minutes = getMinutes(player);
+
+  if (minutes < 300) {
+    progressionRawCache.set(player.player_id, 0);
+    return;
+  }
+
+  const oppositionHalfAccuracy =
+    player.totalOppositionHalfPasses > 5
+      ? player.accurateOppositionHalfPasses / player.totalOppositionHalfPasses
+      : 0;
+
+  const possessionEfficiency =
+    player.touches > 10
+      ? 1 - (player.possessionLostCtrl / player.touches)
+      : 0;
+
+  const raw =
+    per90(player.progressiveBallCarriesCount, minutes) * 0.2 +
+     per90(player.accurateOppositionHalfPasses, minutes) * 0.01 +
+    oppositionHalfAccuracy * 0.2 +
+    possessionEfficiency * 0.15;
+
+    if(player.nome === "Robert Arboleda" || player.nome === "Ayrton Lucas" || player.nome === "Léo Pereira" || player.nome === "Léo Ortiz"){ 
+      console.log('Progressão RAW', player.nome, raw);
+      console.log("Accurate Opposition Half Passes: ", player.accurateOppositionHalfPasses, per90(player.accurateOppositionHalfPasses, minutes) * 0.01, "Progressive Ball Carries: ", player.progressiveBallCarriesCount, per90(player.progressiveBallCarriesCount, minutes) * 0.2, "Opposition Half Accuracy: ", oppositionHalfAccuracy * 0.15, "Possession Efficiency: ", possessionEfficiency * 0.15);
+    } 
+
+  progressionRawCache.set(player.player_id, raw);
+}
+
+
+export function getProgressionRaw(playerId) {
+  return progressionRawCache.get(playerId) ?? 0;
+}
+
+export function getProgressionUniverso(ids) {
+  return ids.map(id => getProgressionRaw(id));
 }

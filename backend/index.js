@@ -1,9 +1,11 @@
 import express from 'express';
 import cors from 'cors';
+import 'dotenv/config';
 
 import compareRoutes from './routes/compare.js';
 import scoutsRoutes from './routes/scouts.js';
 import similarRoutes from './routes/similar.js';
+import aiCompareRoutes from './routes/aiCompare.js';
 
 
 import db from './db.js';
@@ -18,6 +20,7 @@ app.use(express.json());
 app.use('/scouts', scoutsRoutes);
 app.use('/compare', compareRoutes);
 app.use('/similar', similarRoutes);
+app.use('/ai-compare', aiCompareRoutes);
 
 
 db.all('SELECT * FROM scouts', [], (err, rows) => {

@@ -3,7 +3,8 @@ import {
   buildShootingRaw,
   buildDefenseRaw,
   buildDuelRaw, 
-  buildPassRaw
+  buildPassRaw,
+  buildProgressionRaw
 } from './scoring.js';
 
 import calcularRadar from './radarCalculator.js';
@@ -50,7 +51,7 @@ export function buildRawCache(universo) {
     buildDefenseRaw(player);
     buildDuelRaw(player);
     buildPassRaw(player);
-
+    buildProgressionRaw(player);
 
   }
 
