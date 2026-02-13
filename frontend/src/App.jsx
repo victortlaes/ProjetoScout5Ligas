@@ -15,6 +15,9 @@ function App() {
   const [similarResults, setSimilarResults] = useState([]);
   const [aiReport, setAiReport] = useState(null);
   const [loadingAI, setLoadingAI] = useState(false);
+  const [followUp, setFollowUp] = useState('');
+  const [followUpAnswer, setFollowUpAnswer] = useState(null);
+
 
   // ==============================
   // Carregar jogadores
@@ -59,6 +62,26 @@ function App() {
       .then(res => res.json())
       .then(data => setSimilarResults(data.similares));
   }
+
+  function enviarPergunta() {
+  fetch('http://localhost:3001/ai-compare/followup', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      report: aiReport,
+      question: followUp
+    })
+  })
+    .then(res => res.json())
+    .then(data => {
+      setFollowUpAnswer(data.answer);
+      setFollowUp('');
+    })
+    .catch(err => console.error(err));
+}
+
 
   // ==============================
   // Dropdown options (sem goleiros)
@@ -166,16 +189,79 @@ function App() {
 
                 {/* ===== RELATÓRIO IA ===== */}
                 {aiReport && (
-                  <div
-                    className="ai-report"
-                    dangerouslySetInnerHTML={{
-                      __html: aiReport
-                        .replace(/```html/g, '')
-                        .replace(/```/g, '')
-                        .trim()
-                    }}
-                  />
+                  <div style={{ marginTop: 40 }}>
+
+                    {/* Relatório principal */}
+                    <div
+                      className="ai-report"
+                      dangerouslySetInnerHTML={{
+                        __html: aiReport
+                          .replace(/```html/g, '')
+                          .replace(/```/g, '')
+                          .trim()
+                      }}
+                    />
+
+                    {/* ===== FOLLOW UP ===== */}
+                    <div style={{ marginTop: 30 }}>
+                      <h3>Fazer pergunta sobre a análise</h3>
+
+                      <textarea
+                        maxLength={300}
+                        value={followUp}
+                        onChange={(e) => setFollowUp(e.target.value)}
+                        placeholder="Digite sua dúvida (máx 300 caracteres)..."
+                        style={{
+                          width: '100%',
+                          minHeight: 80,
+                          padding: 12,
+                          marginTop: 10,
+                          borderRadius: 8,
+                          border: '1px solid #ccc',
+                          resize: 'none'
+                        }}
+                      />
+
+                      <div style={{ fontSize: 12, textAlign: 'right' }}>
+                        {followUp.length}/300
+                      </div>
+
+                      <button
+                        onClick={enviarPergunta}
+                        disabled={!followUp.trim()}
+                        style={{
+                          marginTop: 10,
+                          padding: '8px 16px',
+                          borderRadius: 6,
+                          border: 'none',
+                          background: '#111',
+                          color: '#fff',
+                          cursor: followUp.trim() ? 'pointer' : 'not-allowed',
+                          opacity: followUp.trim() ? 1 : 0.6
+                        }}
+                      >
+                        Perguntar
+                      </button>
+                    </div>
+
+                    {/* ===== RESPOSTA DO FOLLOW UP ===== */}
+                    {followUpAnswer && (
+                      <div style={{ marginTop: 30 }}>
+                        <h4>Resposta:</h4>
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: followUpAnswer
+                              .replace(/```html/g, '')
+                              .replace(/```/g, '')
+                              .trim()
+                          }}
+                        />
+                      </div>
+                    )}
+
+                  </div>
                 )}
+
 
               </>
             )}
