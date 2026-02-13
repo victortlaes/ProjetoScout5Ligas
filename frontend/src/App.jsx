@@ -3,6 +3,7 @@ import RadarComparison from './components/RadarComparison';
 import Select from 'react-select';
 import PlayerCard from './components/PlayerCard';
 import SimilarPlayerCard from './components/SimilarPlayerCard';
+import './styles/aiReport.css';
 
 function App() {
   const [players, setPlayers] = useState([]);
@@ -166,19 +167,16 @@ function App() {
                 {/* ===== RELATÓRIO IA ===== */}
                 {aiReport && (
                   <div
-                    style={{
-                      marginTop: 40,
-                      padding: 20,
-                      border: '1px solid #ddd',
-                      borderRadius: 8,
-                      background: '#fafafa',
-                      whiteSpace: 'pre-wrap'
+                    className="ai-report"
+                    dangerouslySetInnerHTML={{
+                      __html: aiReport
+                        .replace(/```html/g, '')
+                        .replace(/```/g, '')
+                        .trim()
                     }}
-                  >
-                    <h3>Análise com IA</h3>
-                    {aiReport}
-                  </div>
+                  />
                 )}
+
               </>
             )}
           </div>

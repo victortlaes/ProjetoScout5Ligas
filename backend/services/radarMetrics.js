@@ -9,9 +9,11 @@ const radarConfig = {
   ],
 
   metrics: {
+
     finalizacao: [
       'goals',
       'expectedGoals',
+      'bigChanceMissed',
       'totalShots',
       'onTargetScoringAttempt'
     ],
@@ -19,31 +21,41 @@ const radarConfig = {
     criacao: [
       'goalAssist',
       'expectedAssists',
-      
-      'bigChanceCreated'
+      'bigChanceCreated',
+      'accurateCross',
+      'totalCross'
     ],
 
     passe: [
       'accuratePass',
       'totalPass',
-      'accurateLongBalls', 
-      'keyPass',
+      'accurateLongBalls',
+      'keyPass'
     ],
 
     progressao: [
-      'progressiveBallCarriesCount',
-      'progressivePassesCount'
+      'ballCarriesCount',
+      'accurateOppositionHalfPasses',
+      'totalOppositionHalfPasses',
+      'touches',
+      'possessionLostCtrl'
     ],
 
     duelo: [
       'duelWon',
-      'aerialWon'
-    ],
+      'duelLost',
+      'aerialWon',
+      'aerialLost'
+  ],
 
     defesa: [
+      'wonTackle',
+      'totalTackle',
       'interceptionWon',
+      'totalClearance',
       'ballRecovery',
-      'totalTackle'
+      'outfielderBlock',
+      'challengeLost'
     ]
   }
 };

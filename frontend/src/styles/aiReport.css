@@ -1,0 +1,53 @@
+.ai-report {
+  max-width: 950px;
+  margin: 50px auto;
+  padding: 40px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+  font-family: 'Inter', sans-serif;
+  line-height: 1.7;
+}
+
+.ai-report h1 {
+  font-size: 26px;
+  margin-bottom: 32px;
+  border-bottom: 3px solid #111;
+  padding-bottom: 12px;
+}
+
+.ai-report h2 {
+  margin-top: 30px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #111;
+}
+
+.ai-report ul {
+  margin-top: 16px;
+  padding-left: 20px;
+}
+
+.ai-report li {
+  margin-bottom: 14px;
+  font-size: 15px;
+}
+
+/* Pontos fortes */
+.ai-report li:nth-child(-n+3) {
+  color: #1a7f37;
+}
+
+/* Fraqueza */
+.ai-report li:last-child {
+  color: #b42318;
+  font-weight: 500;
+}
+
+.ai-report p {
+  margin-top: 24px;
+  padding: 18px;
+  background: #f9fafb;
+  border-left: 4px solid #111;
+  font-size: 15px;
+}
