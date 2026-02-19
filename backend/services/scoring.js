@@ -238,11 +238,15 @@ export function buildPassRaw(player) {
       : 0;
 
   const raw =
-    passAccuracy * 0.25 +       // eficiência
+    passAccuracy * 0.3 +       // eficiência
     per90(totalPass, minutes) * 0.01 +       // volume
     per90(accurateLongBalls, minutes) * 0.2 +       // qualidade longa
-    per90(keyPass, minutes) * 0.5;      // impacto criativo
+    per90(keyPass, minutes) * 0.4;      // impacto criativo
 
+     if(player.nome === "Yuri Alberto" || player.nome === "Vitor Roque" ){ 
+      console.log('Pass RAW', player.nome, raw);
+      console.log("Pass Accuracy: ", passAccuracy * 0.25, "Total Pass: ", totalPass, per90(totalPass, minutes) * 0.01, "Accurate Long Balls: ", accurateLongBalls, per90(accurateLongBalls, minutes) * 0.2, "Key Pass: ", keyPass, per90(keyPass, minutes) * 0.4);
+    }
   passRawCache.set(player.player_id, raw);
 }
 

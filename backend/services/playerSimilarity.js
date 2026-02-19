@@ -5,7 +5,10 @@ export function findSimilarPlayers(targetPlayer, universo, topN = 5) {
   const targetVector = getRadar(targetPlayer.player_id);
 
   const similares = universo
-    .filter(p => p.player_id !== targetPlayer.player_id)
+    .filter(p =>
+      p.player_id !== targetPlayer.player_id &&
+      Number(p.minutesPlayed) >= 500
+    )
     .map(p => {
       const vector = getRadar(p.player_id);
 

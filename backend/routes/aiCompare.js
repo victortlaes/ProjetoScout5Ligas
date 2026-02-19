@@ -54,10 +54,10 @@ Analise os dados fornecidos (percentis do radar, métricas brutas e minutos joga
 
 IMPORTANTE:
 - Não liste todas as estatísticas como tabela; cite números quando forem relevantes para justificar um argumento.
-- Considere a minutagem antes de mencionar volume de ações.
+- Considere a minutagem antes de mencionar volume de ações. Se houver grande diferença de minutos, destaque isso como fator de confiabilidade estatística.
 - Não utilize percentis para destacar diferenças.
 - Ao comparar eficiência em métricas de alto volume, utilize porcentagens em vez de volume absoluto.
-- Antes de afirmar que um número é maior que outro, verifique matematicamente qual é superior.
+- Antes de afirmar que um número ou uma porcentagem é maior se comparado a outra, verifique matematicamente qual é superior.
 
 
 Dados do jogador 1:
@@ -93,14 +93,16 @@ Retorne o relatório EXATAMENTE no seguinte formato HTML:
 
 <h2>${pA.nome}</h2>
 <ul class="font">
-<li>3 pontos fortes em que ${pA.nome} supera ${pB.nome} e discorra</li>
-<li>1 fraqueza notável em comparação ao outro</li>
+<li>liste 1 ponto forte em que ${pA.nome} supera ${pB.nome} e discorra. </li>
+<li>liste 1 ponto forte em que ${pA.nome} supera ${pB.nome} e discorra. </li>
+<li>liste 1 fraqueza notável em comparação ao outro e discorra.</li>
 </ul>
 
 <h2>${pB.nome}</h2>
 <ul class="font">
-<li>3 pontos fortes em que ${pB.nome} supera ${pA.nome} e discorra</li>
-<li>1 fraqueza notável em comparação ao outro</li>
+<li>liste 1 ponto forte em que ${pB.nome} supera ${pA.nome} e discorra. </li>
+<li>liste 1 ponto forte em que ${pB.nome} supera ${pA.nome} e discorra. </li>
+<li>liste 1 fraqueza notável em comparação ao outro e discorra.</li>
 </ul>
 
 <h2>Conclusão</h2>
@@ -115,6 +117,8 @@ Breve análise comparativa estratégica destacando:
 Seja técnico, objetivo e estratégico.
 `;
 
+console.log(prompt);
+
 
     try {
       const completion = await openai.chat.completions.create({
@@ -123,7 +127,7 @@ Seja técnico, objetivo e estratégico.
           { role: "system", content: "Você é um analista tático de futebol." },
           { role: "user", content: prompt }
         ],
-        temperature: 0.7
+        temperature: 0.5
       });
 
       const output = completion.choices[0].message.content;
@@ -134,7 +138,7 @@ Seja técnico, objetivo e estratégico.
 
 
       res.json({
-        analysis: completion.choices[0].message.content
+        analysis: output
       });
 
     } catch (error) {
@@ -143,5 +147,55 @@ Seja técnico, objetivo e estratégico.
     }
   });
 });
+
+
+/* ===============================
+   2️⃣ FOLLOW-UP
+================================ */
+router.post('/followup', async (req, res) => {
+  const { report, question } = req.body;
+
+  if (!report || !question) {
+    return res.status(400).json({ error: 'Dados obrigatórios' });
+  }
+
+  const prompt = `
+Relatório anterior:
+${report}
+
+Pergunta do usuário:
+${question}
+
+Responda considerando o relatório.
+Seja direto.
+Não reescreva o relatório inteiro.
+`;
+
+  console.log("\n=== AI FOLLOW UP PERGUNTA ===\n", prompt);
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: "Você é um analista tático profissional." },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.5
+    });
+
+    const output = completion.choices[0].message.content;
+
+    console.log("\n=== AI FOLLOW UP ===\n", output);
+
+    res.json({ answer: output });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erro IA follow-up' });
+  }
+});
+
+
+
 
 export default router;
