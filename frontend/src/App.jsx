@@ -1,308 +1,330 @@
-import { useEffect, useState, useMemo } from 'react';
-import RadarComparison from './components/RadarComparison';
-import Select from 'react-select';
+import { useEffect, useState, useMemo, useRef } from 'react';
+import Header from './components/Header';
+import FilterBar from './components/FilterBar';
+import PlayerSelect from './components/PlayerSelect';
 import PlayerCard from './components/PlayerCard';
+import RadarComparison from './components/RadarComparison';
+import AIReport from './components/AIReport';
 import SimilarPlayerCard from './components/SimilarPlayerCard';
-import './styles/aiReport.css';
+import ScoutMarket from './components/ScoutMarket';
+import { getLeague } from './utils/leagueMap';
+import styles from './App.module.css';
 
-function App() {
-  const [players, setPlayers] = useState([]);
-  const [playerA, setPlayerA] = useState(null);
-  const [playerB, setPlayerB] = useState(null);
-  const [compareData, setCompareData] = useState(null);
-  const [view, setView] = useState('compare');
-  const [similarPlayer, setSimilarPlayer] = useState(null);
-  const [similarResults, setSimilarResults] = useState([]);
-  const [aiReport, setAiReport] = useState(null);
-  const [loadingAI, setLoadingAI] = useState(false);
-  const [followUp, setFollowUp] = useState('');
+const API = 'http://localhost:3001';
+
+const DEFAULT_FILTERS = {
+  leagues:  [],
+  position: '',
+  age:      { min: 15, max: 44 },
+};
+
+export default function App() {
+  const [players, setPlayers]           = useState([]);
+  const [view, setView]                 = useState('compare');
+
+  // Filtros
+  const [filters, setFilters]           = useState(DEFAULT_FILTERS);
+
+  // Compare
+  const [playerA, setPlayerA]           = useState(null);
+  const [playerB, setPlayerB]           = useState(null);
+  const [compareData, setCompareData]   = useState(null);
+  const [loadingCompare, setLoadingCompare] = useState(false);
+
+  // IA
+  const [aiReport, setAiReport]         = useState(null);
+  const [loadingAI, setLoadingAI]       = useState(false);
+  const [followUp, setFollowUp]         = useState('');
   const [followUpAnswer, setFollowUpAnswer] = useState(null);
 
+  // Similar
+  const [similarPlayer, setSimilarPlayer]   = useState(null);
+  const [similarResults, setSimilarResults] = useState([]);
+  const [loadingSimilar, setLoadingSimilar] = useState(false);
 
-  // ==============================
   // Carregar jogadores
-  // ==============================
   useEffect(() => {
-    fetch('http://localhost:3001/scouts')
-      .then(res => res.json())
-      .then(data => setPlayers(data));
+    fetch(`${API}/scouts`)
+      .then(r => r.json())
+      .then(setPlayers)
+      .catch(console.error);
   }, []);
 
-  // ==============================
-  // Comparação normal
-  // ==============================
-  function comparar() {
-    setAiReport(null);
-
-    fetch(`http://localhost:3001/compare?a=${playerA}&b=${playerB}`)
-      .then(res => res.json())
-      .then(data => setCompareData(data));
-  }
-
-  // ==============================
-  // Comparação com IA
-  // ==============================
-  function compararComIA() {
-    setLoadingAI(true);
-
-    fetch(`http://localhost:3001/ai-compare?a=${playerA}&b=${playerB}`)
-      .then(res => res.json())
-      .then(data => {
-        setAiReport(data.analysis);
-        setLoadingAI(false);
+  // Opções filtradas para os dropdowns (sem goleiros)
+  const filteredOptions = useMemo(() => {
+    return players
+      .filter(p => {
+        if (p.posicao === 'G') return false;
+        if (filters.position && p.posicao !== filters.position) return false;
+        if (filters.leagues.length > 0 && !filters.leagues.includes(getLeague(p.time))) return false;
+        const age = Number(p.idade) || 0;
+        if (age > 0 && (age < filters.age.min || age > filters.age.max)) return false;
+        return true;
       })
-      .catch(() => setLoadingAI(false));
-  }
+      .map(p => ({
+        value: p.player_id,
+        label: p.nome,
+        time:  p.time,
+        posicao: p.posicao,
+        foto:  p.url_foto,
+        idade: p.idade,
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [players, filters]);
 
-  // ==============================
-  // Similaridade
-  // ==============================
-  function buscarSimilares() {
-    fetch(`http://localhost:3001/similar?a=${similarPlayer}`)
-      .then(res => res.json())
-      .then(data => setSimilarResults(data.similares));
-  }
-
-  function enviarPergunta() {
-  fetch('http://localhost:3001/ai-compare/followup', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      report: aiReport,
-      question: followUp
-    })
-  })
-    .then(res => res.json())
-    .then(data => {
-      setFollowUpAnswer(data.answer);
-      setFollowUp('');
-    })
-    .catch(err => console.error(err));
-}
-
-
-  // ==============================
-  // Dropdown options (sem goleiros)
-  // ==============================
-  const playerOptions = useMemo(() => {
+  // Opções similares (inclui todas as posições mas não G)
+  const allOptions = useMemo(() => {
     return players
       .filter(p => p.posicao !== 'G')
       .map(p => ({
-        value: p.player_id,
-        label: `${p.nome} (${p.time})`
-      }));
+        value:   p.player_id,
+        label:   p.nome,
+        time:    p.time,
+        posicao: p.posicao,
+        foto:    p.url_foto,
+        idade:   p.idade,
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label));
   }, [players]);
 
+  // Jogador completo para o card
+  function getPlayer(id) {
+    return players.find(p => p.player_id == id) || null;
+  }
+
+  // Compare
+  function comparar() {
+    if (!playerA || !playerB) return;
+    setLoadingCompare(true);
+    setAiReport(null);
+    setFollowUp('');
+    setFollowUpAnswer(null);
+
+    fetch(`${API}/compare?a=${playerA}&b=${playerB}`)
+      .then(r => r.json())
+      .then(data => { setCompareData(data); setLoadingCompare(false); })
+      .catch(() => setLoadingCompare(false));
+  }
+
+  function compararComIA() {
+    if (!playerA || !playerB) return;
+    setLoadingAI(true);
+    setFollowUpAnswer(null);
+
+    fetch(`${API}/ai-compare?a=${playerA}&b=${playerB}`)
+      .then(r => r.json())
+      .then(data => { setAiReport(data.analysis); setLoadingAI(false); })
+      .catch(() => setLoadingAI(false));
+  }
+
+  function enviarFollowUp() {
+    fetch(`${API}/ai-compare/followup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ report: aiReport, question: followUp }),
+    })
+      .then(r => r.json())
+      .then(data => { setFollowUpAnswer(data.answer); setFollowUp(''); })
+      .catch(console.error);
+  }
+
+  // Similar — busca reativa
+  const radarCanvasRef = useRef(null);
+  useEffect(() => {
+    if (!similarPlayer) {
+      setSimilarResults([]);
+      return;
+    }
+    setLoadingSimilar(true);
+
+    // Monta query com filtros ativos
+    const params = new URLSearchParams({ a: similarPlayer });
+    if (filters.leagues.length > 0)  params.set('leagues', filters.leagues.join(','));
+    if (filters.position)             params.set('position', filters.position);
+    if (filters.age.min > 15)         params.set('ageMin', filters.age.min);
+    if (filters.age.max < 44)         params.set('ageMax', filters.age.max);
+
+    fetch(`${API}/similar?${params}`)
+      .then(r => r.json())
+      .then(data => { setSimilarResults(data.similares || []); setLoadingSimilar(false); })
+      .catch(() => setLoadingSimilar(false));
+  }, [similarPlayer, filters]);
+
+  const pA = getPlayer(playerA);
+  const pB = getPlayer(playerB);
+
   return (
-    <div style={{ padding: 24 }}>
+    <div className={styles.layout}>
+      <Header view={view} setView={setView} />
+      <FilterBar filters={filters} setFilters={setFilters} />
 
-      {/* ==============================
-          NAV SUPERIOR
-      ============================== */}
-      <div
-        style={{
-          display: 'flex',
-          gap: 16,
-          marginBottom: 24,
-          borderBottom: '1px solid #ddd',
-          paddingBottom: 12
-        }}
-      >
-        <button
-          onClick={() => setView('compare')}
-          style={{ fontWeight: view === 'compare' ? 'bold' : 'normal' }}
-        >
-          Comparação de Jogadores
-        </button>
+      <main className={styles.main}>
 
-        <button
-          onClick={() => setView('similar')}
-          style={{ fontWeight: view === 'similar' ? 'bold' : 'normal' }}
-        >
-          Similaridade
-        </button>
-      </div>
+        {/* ============================
+            VIEW: COMPARAÇÃO
+        ============================ */}
+        {view === 'compare' && (
+          <div className={styles.page}>
+            <div className={styles.pageHeader}>
+              <div>
+                <h1 className={styles.pageTitle}>Comparação de Jogadores</h1>
+                <p className={styles.pageSubtitle}>
+                  Selecione dois jogadores para comparar via radar de percentis e análise IA
+                </p>
+              </div>
+              <div className={styles.resultCount}>
+                {filteredOptions.length.toLocaleString('pt-BR')} jogadores
+              </div>
+            </div>
 
-      {/* ==============================
-          VIEW: COMPARAÇÃO
-      ============================== */}
-      {view === 'compare' && (
-        <>
-          <h1>MVP – Comparação de Jogadores</h1>
+            {/* Seleção */}
+            <div className={styles.selectionRow}>
+              <div className={styles.selectWrap}>
+                <span className={styles.selectLabel} style={{ color: '#1d6ef5' }}>Jogador A</span>
+                <PlayerSelect
+                  options={filteredOptions}
+                  value={playerA}
+                  onChange={setPlayerA}
+                  placeholder="Buscar jogador A..."
+                />
+              </div>
 
-          <div style={{ display: 'flex', gap: 12 }}>
-            <Select
-              placeholder="Jogador A"
-              options={playerOptions}
-              value={playerOptions.find(o => o.value === playerA) || null}
-              onChange={option => setPlayerA(option ? option.value : null)}
-              isClearable
-            />
+              <div className={styles.vsChip}>VS</div>
 
-            <Select
-              placeholder="Jogador B"
-              options={playerOptions}
-              value={playerOptions.find(o => o.value === playerB) || null}
-              onChange={option => setPlayerB(option ? option.value : null)}
-              isClearable
-            />
+              <div className={styles.selectWrap}>
+                <span className={styles.selectLabel} style={{ color: '#e85d24' }}>Jogador B</span>
+                <PlayerSelect
+                  options={filteredOptions}
+                  value={playerB}
+                  onChange={setPlayerB}
+                  placeholder="Buscar jogador B..."
+                />
+              </div>
+            </div>
 
-            <button
-              onClick={comparar}
-              disabled={!playerA || !playerB}
-            >
-              Comparar
-            </button>
+            {/* Ações */}
+            <div className={styles.actions}>
+              <button
+                className={styles.btnPrimary}
+                onClick={comparar}
+                disabled={!playerA || !playerB || loadingCompare}
+              >
+                {loadingCompare ? (
+                  <><span className={styles.spinner}/> Calculando...</>
+                ) : (
+                  <><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M8 2l6 6-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg> Comparar</>
+                )}
+              </button>
 
-            <button
-              onClick={compararComIA}
-              disabled={!playerA || !playerB || loadingAI}
-            >
-              {loadingAI ? 'Gerando...' : 'Comparar com IA'}
-            </button>
-          </div>
+              <button
+                className={styles.btnSecondary}
+                onClick={compararComIA}
+                disabled={!playerA || !playerB || loadingAI}
+              >
+                {loadingAI ? (
+                  <><span className={styles.spinner}/> Gerando análise...</>
+                ) : (
+                  <><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.3"/><path d="M5.5 8l1.8 1.8L10.5 5.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg> Análise com IA</>
+                )}
+              </button>
+            </div>
 
-          <div style={{ marginTop: 40 }}>
+            {/* Resultado */}
             {compareData?.players?.length === 2 && (
-              <>
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'flex-start',
-                    gap: 32
-                  }}
-                >
-                  <PlayerCard player={compareData.players[0]} />
+              <div className={styles.compareResult}>
+                <div className={styles.compareLayout}>
+                  <PlayerCard player={compareData.players[0]} color="#1d6ef5" />
 
-                  <div style={{ width: 400 }}>
+                  <div className={styles.radarWrap} ref={radarCanvasRef}>
                     <RadarComparison
                       labels={compareData.labels}
                       players={compareData.players}
                     />
                   </div>
 
-                  <PlayerCard player={compareData.players[1]} />
+                  <PlayerCard player={compareData.players[1]} color="#e85d24" />
                 </div>
 
-                {/* ===== RELATÓRIO IA ===== */}
                 {aiReport && (
-                  <div style={{ marginTop: 40 }}>
-
-                    {/* Relatório principal */}
-                    <div
-                      className="ai-report"
-                      dangerouslySetInnerHTML={{
-                        __html: aiReport
-                          .replace(/```html/g, '')
-                          .replace(/```/g, '')
-                          .trim()
-                      }}
-                    />
-
-                    {/* ===== FOLLOW UP ===== */}
-                    <div style={{ marginTop: 30 }}>
-                      <h3>Fazer pergunta sobre a análise</h3>
-
-                      <textarea
-                        maxLength={300}
-                        value={followUp}
-                        onChange={(e) => setFollowUp(e.target.value)}
-                        placeholder="Digite sua dúvida (máx 300 caracteres)..."
-                        style={{
-                          width: '100%',
-                          minHeight: 80,
-                          padding: 12,
-                          marginTop: 10,
-                          borderRadius: 8,
-                          border: '1px solid #ccc',
-                          resize: 'none'
-                        }}
-                      />
-
-                      <div style={{ fontSize: 12, textAlign: 'right' }}>
-                        {followUp.length}/300
-                      </div>
-
-                      <button
-                        onClick={enviarPergunta}
-                        disabled={!followUp.trim()}
-                        style={{
-                          marginTop: 10,
-                          padding: '8px 16px',
-                          borderRadius: 6,
-                          border: 'none',
-                          background: '#111',
-                          color: '#fff',
-                          cursor: followUp.trim() ? 'pointer' : 'not-allowed',
-                          opacity: followUp.trim() ? 1 : 0.6
-                        }}
-                      >
-                        Perguntar
-                      </button>
-                    </div>
-
-                    {/* ===== RESPOSTA DO FOLLOW UP ===== */}
-                    {followUpAnswer && (
-                      <div style={{ marginTop: 30 }}>
-                        <h4>Resposta:</h4>
-                        <div
-                          dangerouslySetInnerHTML={{
-                            __html: followUpAnswer
-                              .replace(/```html/g, '')
-                              .replace(/```/g, '')
-                              .trim()
-                          }}
-                        />
-                      </div>
-                    )}
-
-                  </div>
+                  <AIReport
+                    report={aiReport}
+                    playerA={pA?.nome || 'Jogador A'}
+                    playerB={pB?.nome || 'Jogador B'}
+                    followUp={followUp}
+                    setFollowUp={setFollowUp}
+                    followUpAnswer={followUpAnswer}
+                    onAskFollowUp={enviarFollowUp}
+                    radarCanvasRef={radarCanvasRef}
+                  />
                 )}
-
-
-              </>
+              </div>
             )}
           </div>
-        </>
-      )}
+        )}
 
-      {/* ==============================
-          VIEW: SIMILARIDADE
-      ============================== */}
-      {view === 'similar' && (
-        <>
-          <h1>MVP – Similaridade de Jogadores</h1>
+        {/* ============================
+            VIEW: SIMILARIDADE
+        ============================ */}
+        {view === 'similar' && (
+          <div className={styles.page}>
+            <div className={styles.pageHeader}>
+              <div>
+                <h1 className={styles.pageTitle}>Buscar Jogadores Similares</h1>
+                <p className={styles.pageSubtitle}>
+                  Selecione um jogador — os resultados atualizam automaticamente conforme os filtros
+                </p>
+              </div>
+            </div>
 
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-            <Select
-              placeholder="Jogador base"
-              options={playerOptions}
-              value={playerOptions.find(o => o.value === similarPlayer) || null}
-              onChange={option => setSimilarPlayer(option ? option.value : null)}
-              isClearable
-            />
+            <div className={styles.similarSearch}>
+              <div style={{ flex: 1 }}>
+                <PlayerSelect
+                  options={allOptions}
+                  value={similarPlayer}
+                  onChange={setSimilarPlayer}
+                  placeholder="Selecionar jogador base..."
+                />
+              </div>
+              {loadingSimilar && (
+                <div className={styles.loadingChip}>
+                  <span className={styles.spinner} style={{ borderTopColor: '#1d6ef5', borderColor: '#dde3ef' }}/>
+                  Buscando...
+                </div>
+              )}
+            </div>
 
-            <button
-              onClick={buscarSimilares}
-              disabled={!similarPlayer}
-            >
-              Buscar
-            </button>
+            {similarResults.length > 0 && (
+              <div className={styles.similarResults}>
+                <div className={styles.similarHeader}>
+                  <span className={styles.similarTarget}>
+                    Similares a <strong>{getPlayer(similarPlayer)?.nome}</strong>
+                    {(filters.leagues.length > 0 || filters.position || filters.age.min > 15 || filters.age.max < 44) && (
+                      <span className={styles.filterNote}> · filtros ativos</span>
+                    )}
+                  </span>
+                  <span className={styles.resultCount}>{similarResults.length} encontrados</span>
+                </div>
+
+                <div className={styles.similarList}>
+                  {similarResults.map((p, i) => (
+                    <SimilarPlayerCard key={p.player_id} player={p} rank={i + 1} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {!loadingSimilar && similarPlayer && similarResults.length === 0 && (
+              <div className={styles.emptyState}>
+                Nenhum jogador encontrado com os filtros atuais. Tente ampliar os critérios.
+              </div>
+            )}
           </div>
+        )}
+        {view === 'scout' && (
+          <ScoutMarket filters={filters} setFilters={setFilters} />
+        )}
 
-          <div style={{ marginTop: 32 }}>
-            {similarResults.map(p => (
-              <SimilarPlayerCard key={p.player_id} player={p} />
-            ))}
-          </div>
-        </>
-      )}
-
+      </main>
     </div>
   );
 }
-
-export default App;

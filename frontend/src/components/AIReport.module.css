@@ -1,0 +1,237 @@
+.wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  margin-top: 32px;
+}
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+}
+
+.toolbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.aiChip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-dim);
+  padding: 4px 10px;
+  border-radius: 99px;
+}
+
+.matchup {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.exportBtn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 18px;
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.exportBtn:hover {
+  background: var(--navy-mid);
+  transform: translateY(-1px);
+}
+
+.exportBtn:active {
+  transform: translateY(0);
+}
+
+/* Corpo do relatório */
+.reportBody {
+  padding: 32px;
+  line-height: 1.75;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.reportBody h1 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 24px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid var(--border);
+}
+
+.reportBody h2 {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--navy-mid);
+  margin: 24px 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reportBody h2::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 16px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+.reportBody ul {
+  padding-left: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.reportBody li {
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--text-secondary);
+  padding: 12px 16px;
+  background: var(--surface2);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--border-mid);
+}
+
+.reportBody li:first-child,
+.reportBody li:nth-child(2) {
+  border-left-color: #2f855a;
+  background: #f0fff4;
+  color: #22543d;
+}
+
+.reportBody li:last-child {
+  border-left-color: #e53e3e;
+  background: #fff5f5;
+  color: #742a2a;
+}
+
+.reportBody p {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  padding: 16px 20px;
+  background: var(--accent-dim);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--accent);
+  margin: 10px 0;
+}
+
+/* Follow-up */
+.followup {
+  border-top: 1px solid var(--border);
+  padding: 24px 32px;
+  background: var(--surface2);
+}
+
+.followupTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.followupInput {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+.followupInput:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(29,110,245,0.1);
+}
+
+.followupInput textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-primary);
+  background: transparent;
+  line-height: 1.6;
+}
+
+.followupActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--border);
+}
+
+.charCount {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.askBtn {
+  padding: 7px 18px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.askBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.askBtn:not(:disabled):hover {
+  background: var(--navy-light);
+}
+
+.followupAnswer {
+  margin-top: 20px;
+  padding: 16px 20px;
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--text-secondary);
+}
