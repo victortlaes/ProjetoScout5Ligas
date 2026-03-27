@@ -1,7 +1,7 @@
 export const LEAGUE_MAP = {
   'Brasileirão Série A': [
     'Atlético Mineiro','Bahia','Botafogo','Corinthians','Cruzeiro',
-    'Flamengo','Fluminense','Fortaleza','Fortaleza FC','Grêmio','Internacional',
+    'Flamengo','Fluminense','Fortaleza','Grêmio','Internacional',
     'Juventude','Mirassol','Palmeiras','Red Bull Bragantino','Santos',
     'São Paulo','Sport Recife','Vasco da Gama','Vitória','Ceará',
   ],
@@ -17,7 +17,7 @@ export const LEAGUE_MAP = {
   'Dimayor Colombia': [
     'Alianza Valledupar FC','América de Cali','Atlético Bucaramanga','Atlético Nacional',
     'Boyacá Chicó FC','Deportes Tolima','Deportivo Cali','Deportivo La Equidad',
-    'Deportivo Pasto','Deportivo Pereira','Deportivo Riestra','Envigado FC',
+    'Deportivo Pasto','Deportivo Pereira','Deportivo Riestra','Envigado FC','Fortaleza FC',
     'Independiente Medellín','Independiente Santa Fe','Junior Barranquilla',
     'Llaneros FC','Millonarios','Once Caldas','Rionegro Águilas Doradas','Unión Magdalena',
   ],

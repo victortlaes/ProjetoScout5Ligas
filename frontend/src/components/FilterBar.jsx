@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ALL_LEAGUES, LEAGUE_FLAGS } from '../utils/leagueMap';
+import { ALL_LEAGUES } from '../utils/leagueMap';
+import Flag from 'react-world-flags';
 import styles from './FilterBar.module.css';
 
 const POSITIONS = [
@@ -8,6 +9,14 @@ const POSITIONS = [
   { value: 'M', label: 'Meia' },
   { value: 'D', label: 'Defensor' },
 ];
+
+const LEAGUE_CODE = {
+  'Brasileirão Série A': 'BRA',
+  'Liga Profesional Argentina': 'ARG',
+  'Dimayor Colombia': 'COL',
+  'Liga MX': 'MEX',
+  'MLS': 'USA',
+};
 
 export default function FilterBar({ filters, setFilters }) {
   const [ageOpen, setAgeOpen] = useState(false);
@@ -51,7 +60,15 @@ export default function FilterBar({ filters, setFilters }) {
               className={`${styles.pill} ${filters.leagues.includes(liga) ? styles.active : ''}`}
               onClick={() => toggleLeague(liga)}
             >
-              {LEAGUE_FLAGS[liga]} {liga}
+              <span className={styles.flag}>
+                <Flag
+                  code={LEAGUE_CODE[liga]}
+                  height="12"
+                  style={{ borderRadius: 2 }}
+                  fallback={<span className={styles.flagFallback}>{LEAGUE_CODE[liga]}</span>}
+                />
+              </span>
+              {liga}
             </button>
           ))}
         </div>

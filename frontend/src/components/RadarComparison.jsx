@@ -8,7 +8,7 @@ const COLORS = [
   { border: '#e85d24', bg: 'rgba(232,93,36,0.12)'  },
 ];
 
-export default function RadarComparison({ labels, players }) {
+export default function RadarComparison({ labels, players, compact = false }) {
   if (!players || players.length !== 2) return null;
 
   const data = {
@@ -71,7 +71,7 @@ export default function RadarComparison({ labels, players }) {
   };
 
   return (
-    <div style={{ height: 420, width: '100%', padding: '8px 0' }}>
+    <div style={{ height: compact ? 360 : 420, width: '100%', padding: '8px 0' }}>
       <Radar data={data} options={options} />
     </div>
   );

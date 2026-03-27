@@ -8,6 +8,7 @@ import AIReport from './components/AIReport';
 import SimilarPlayerCard from './components/SimilarPlayerCard';
 import ScoutMarket from './components/ScoutMarket';
 import { getLeague } from './utils/leagueMap';
+import { resolveBirthCountryCode } from './utils/countryFlag';
 import styles from './App.module.css';
 
 const API = 'http://localhost:3001';
@@ -30,6 +31,7 @@ export default function App() {
   const [playerB, setPlayerB]           = useState(null);
   const [compareData, setCompareData]   = useState(null);
   const [loadingCompare, setLoadingCompare] = useState(false);
+  const [autoCompare, setAutoCompare]   = useState(false);
 
   // IA
   const [aiReport, setAiReport]         = useState(null);
@@ -40,7 +42,9 @@ export default function App() {
   // Similar
   const [similarPlayer, setSimilarPlayer]   = useState(null);
   const [similarResults, setSimilarResults] = useState([]);
+  const [baseRadar,      setBaseRadar]      = useState([]);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
+  const similarRequestSeq = useRef(0);
 
   // Carregar jogadores
   useEffect(() => {
@@ -68,6 +72,7 @@ export default function App() {
         posicao: p.posicao,
         foto:  p.url_foto,
         idade: p.idade,
+        birthCountryCode: resolveBirthCountryCode(p),
       }))
       .sort((a, b) => a.label.localeCompare(b.label));
   }, [players, filters]);
@@ -83,6 +88,7 @@ export default function App() {
         posicao: p.posicao,
         foto:    p.url_foto,
         idade:   p.idade,
+        birthCountryCode: resolveBirthCountryCode(p),
       }))
       .sort((a, b) => a.label.localeCompare(b.label));
   }, [players]);
@@ -106,15 +112,40 @@ export default function App() {
       .catch(() => setLoadingCompare(false));
   }
 
+  // Se veio do "Comparar" na lista de similares, roda automaticamente
+  useEffect(() => {
+    if (!autoCompare) return;
+    if (view !== 'compare') return;
+    if (!playerA || !playerB) return;
+    comparar();
+    setAutoCompare(false);
+  }, [autoCompare, view, playerA, playerB]);
+
   function compararComIA() {
     if (!playerA || !playerB) return;
     setLoadingAI(true);
     setFollowUpAnswer(null);
 
     fetch(`${API}/ai-compare?a=${playerA}&b=${playerB}`)
-      .then(r => r.json())
-      .then(data => { setAiReport(data.analysis); setLoadingAI(false); })
-      .catch(() => setLoadingAI(false));
+      .then(async r => {
+        const data = await r.json();
+        if (!r.ok) {
+          throw new Error(data?.error || 'Falha ao gerar analise IA');
+        }
+        return data;
+      })
+      .then(data => {
+        if (typeof data?.analysis === 'string' && data.analysis.trim()) {
+          setAiReport(data.analysis);
+        } else {
+          setAiReport(null);
+        }
+        setLoadingAI(false);
+      })
+      .catch(() => {
+        setAiReport(null);
+        setLoadingAI(false);
+      });
   }
 
   function enviarFollowUp() {
@@ -133,8 +164,13 @@ export default function App() {
   useEffect(() => {
     if (!similarPlayer) {
       setSimilarResults([]);
+      setBaseRadar([]);
+      setLoadingSimilar(false);
       return;
     }
+
+    const requestId = ++similarRequestSeq.current;
+    const controller = new AbortController();
     setLoadingSimilar(true);
 
     // Monta query com filtros ativos
@@ -144,11 +180,35 @@ export default function App() {
     if (filters.age.min > 15)         params.set('ageMin', filters.age.min);
     if (filters.age.max < 44)         params.set('ageMax', filters.age.max);
 
-    fetch(`${API}/similar?${params}`)
+    fetch(`${API}/similar?${params.toString()}`, { signal: controller.signal })
       .then(r => r.json())
-      .then(data => { setSimilarResults(data.similares || []); setLoadingSimilar(false); })
-      .catch(() => setLoadingSimilar(false));
+      .then(data => {
+        // Ignora resposta antiga (evita "reset" visual dos filtros)
+        if (requestId !== similarRequestSeq.current) return;
+        setSimilarResults(data.similares || []);
+        setBaseRadar(data.baseRadar || []);
+        setLoadingSimilar(false);
+      })
+      .catch(err => {
+        if (err?.name === 'AbortError') return;
+        if (requestId !== similarRequestSeq.current) return;
+        setLoadingSimilar(false);
+      });
+
+    return () => controller.abort();
   }, [similarPlayer, filters]);
+
+  // Navega para comparação pré-selecionando jogador base + similar
+  function handleCompareFromSimilar(similarId) {
+    setPlayerA(similarPlayer);
+    setPlayerB(similarId);
+    setCompareData(null);
+    setAiReport(null);
+    setFollowUp('');
+    setFollowUpAnswer(null);
+    setView('compare');
+    setAutoCompare(true);
+  }
 
   const pA = getPlayer(playerA);
   const pB = getPlayer(playerB);
@@ -232,24 +292,28 @@ export default function App() {
             {/* Resultado */}
             {compareData?.players?.length === 2 && (
               <div className={styles.compareResult}>
-                <div className={styles.compareLayout}>
-                  <PlayerCard player={compareData.players[0]} color="#1d6ef5" />
+                {!aiReport && (
+                  <div className={styles.compareLayout}>
+                    <PlayerCard player={compareData.players[0]} color="#1d6ef5" />
 
-                  <div className={styles.radarWrap} ref={radarCanvasRef}>
-                    <RadarComparison
-                      labels={compareData.labels}
-                      players={compareData.players}
-                    />
+                    <div className={styles.radarWrap} ref={radarCanvasRef}>
+                      <RadarComparison
+                        labels={compareData.labels}
+                        players={compareData.players}
+                      />
+                    </div>
+
+                    <PlayerCard player={compareData.players[1]} color="#e85d24" />
                   </div>
-
-                  <PlayerCard player={compareData.players[1]} color="#e85d24" />
-                </div>
+                )}
 
                 {aiReport && (
                   <AIReport
                     report={aiReport}
                     playerA={pA?.nome || 'Jogador A'}
                     playerB={pB?.nome || 'Jogador B'}
+                    comparePlayers={compareData.players}
+                    compareLabels={compareData.labels}
                     followUp={followUp}
                     setFollowUp={setFollowUp}
                     followUpAnswer={followUpAnswer}
@@ -307,7 +371,13 @@ export default function App() {
 
                 <div className={styles.similarList}>
                   {similarResults.map((p, i) => (
-                    <SimilarPlayerCard key={p.player_id} player={p} rank={i + 1} />
+                    <SimilarPlayerCard
+                      key={p.player_id}
+                      player={p}
+                      rank={i + 1}
+                      baseRadar={baseRadar}
+                      onCompare={handleCompareFromSimilar}
+                    />
                   ))}
                 </div>
               </div>

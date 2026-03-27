@@ -1,12 +1,13 @@
 import Select from 'react-select';
 import Flag from 'react-world-flags';
-import { getLeague, LEAGUE_FLAGS } from '../utils/leagueMap';
+import { getLeague } from '../utils/leagueMap';
 
 const POSITION_LABEL = { F: 'ATA', M: 'MEI', D: 'DEF', G: 'GOL' };
 const POSITION_COLOR = { F: '#e53e3e', M: '#1d6ef5', D: '#2f855a', G: '#d69e2e' };
 const LEAGUE_CODE    = { 'Brasileirão Série A': 'BRA', 'Liga Profesional Argentina': 'ARG', 'Dimayor Colombia': 'COL', 'Liga MX': 'MEX', 'MLS': 'USA' };
 
 function formatOptionLabel(opt) {
+  const birthCode = opt.birthCountryCode || null;
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
       {opt.foto && (
@@ -32,17 +33,16 @@ function formatOptionLabel(opt) {
           }}>
             {POSITION_LABEL[opt.posicao]}
           </span>
+          {birthCode && (
+            <Flag
+              code={birthCode}
+              height="11"
+              style={{ borderRadius: 2 }}
+              fallback={<span style={{ fontSize: 10, fontWeight: 800 }}>{birthCode}</span>}
+            />
+          )}
           <span>{opt.time}</span>
           <span>·</span>
-          <span style={{
-            background: '#e8eef7',
-            color: '#1a3560',
-            padding: '1px 5px',
-            borderRadius: 3,
-            fontWeight: 700,
-            fontSize: 9,
-            letterSpacing: '0.04em',
-          }}>{LEAGUE_FLAGS[getLeague(opt.time)]}</span>
           <span>{getLeague(opt.time)}</span>
         </div>
       </div>

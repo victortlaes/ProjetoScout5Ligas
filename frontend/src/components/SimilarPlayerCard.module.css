@@ -1,24 +1,32 @@
 .card {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px 20px;
-  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  transition: box-shadow 0.15s, border-color 0.15s, transform 0.15s;
-  cursor: default;
+  background: var(--surface);
+  overflow: hidden;
+  transition: box-shadow 0.15s, border-color 0.15s;
 }
 
 .card:hover {
   box-shadow: var(--shadow-md);
   border-color: var(--border-mid);
-  transform: translateX(3px);
+}
+
+.expanded {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(29,110,245,0.1);
+}
+
+/* ——— LINHA PRINCIPAL ——— */
+.mainRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
 }
 
 .rank {
   font-family: var(--font-display);
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 800;
   color: var(--border-mid);
   width: 28px;
@@ -69,9 +77,7 @@
   font-weight: 600;
 }
 
-.dot {
-  color: var(--border-mid);
-}
+.dot { color: var(--border-mid); }
 
 .leagueBadge {
   background: #e8eef7;
@@ -99,4 +105,187 @@
   justify-content: center;
   font-size: 12px;
   font-weight: 700;
+}
+
+/* Botão expand */
+.expandBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.expandBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.expandBtnOpen {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+  transform: rotate(180deg);
+}
+
+/* ——— PAINEL EXPANDIDO ——— */
+.expandPanel {
+  border-top: 1px solid var(--border);
+  background: var(--surface2);
+  padding: 16px 20px 20px;
+  animation: slideDown 0.18s ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.simpleCompare {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.simplePctList {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 18px;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.pctChip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  flex-shrink: 0;
+}
+
+.pctDelta {
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  min-width: 34px;
+  text-align: left;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pctArrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  flex-shrink: 0;
+}
+
+.pctArrowEqual {
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 900;
+}
+
+.pctValue {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.pctLabel {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pctChip_up .pctDelta,
+.pctChip_up .pctValue,
+.pctChip_up .pctLabel {
+  color: #2f855a;
+}
+
+.pctChip_down .pctDelta,
+.pctChip_down .pctValue,
+.pctChip_down .pctLabel {
+  color: #c0392b;
+}
+
+.pctChip_equal .pctDelta,
+.pctChip_equal .pctValue,
+.pctChip_equal .pctLabel {
+  color: #8a9ab8;
+}
+
+.compareBtnRight {
+  flex-shrink: 0;
+  padding: 12px 22px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--navy);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s, border-color 0.15s;
+  min-width: 150px;
+}
+
+@media (max-width: 980px) {
+  .simplePctList {
+    gap: 14px;
+  }
+  .pctValue {
+    font-size: 24px;
+  }
+  .pctLabel {
+    font-size: 11px;
+  }
+  .pctDelta {
+    font-size: 12px;
+    min-width: 32px;
+  }
+}
+
+.compareBtnRight:hover {
+  background: var(--navy-mid);
+  transform: translateY(-1px);
+}
+
+.compareBtnRight:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 720px) {
+  .simpleCompare {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .compareBtnRight {
+    width: 100%;
+    min-width: 0;
+  }
 }

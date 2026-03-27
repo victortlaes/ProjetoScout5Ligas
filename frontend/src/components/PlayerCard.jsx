@@ -1,10 +1,8 @@
-import { getLeague, LEAGUE_FLAGS } from '../utils/leagueMap';
+import { resolveBirthCountryCode, resolveBirthCountryName } from '../utils/countryFlag';
 import Flag from 'react-world-flags';
 import styles from './PlayerCard.module.css';
 
-const POSITION_LABEL = { F: 'Atacante', M: 'Meia', D: 'Defensor', G: 'Goleiro' };
 const POSITION_COLOR = { F: '#e53e3e', M: '#1d6ef5', D: '#2f855a', G: '#d69e2e' };
-const LEAGUE_CODE    = { 'Brasileirão Série A': 'BRA', 'Liga Profesional Argentina': 'ARG', 'Dimayor Colombia': 'COL', 'Liga MX': 'MEX', 'MLS': 'USA' };
 
 function StatRow({ label, value }) {
   return (
@@ -17,8 +15,9 @@ function StatRow({ label, value }) {
 
 export default function PlayerCard({ player, color = '#1d6ef5' }) {
   if (!player) return null;
-  const liga = getLeague(player.time);
   const posColor = POSITION_COLOR[player.posicao] || color;
+  const birthCountryCode = resolveBirthCountryCode(player);
+  const birthCountryName = resolveBirthCountryName(player);
 
   const valorFormatado = player.valor_mercado
     ? `€ ${(player.valor_mercado / 1_000_000).toFixed(1)}M`
@@ -42,16 +41,26 @@ export default function PlayerCard({ player, color = '#1d6ef5' }) {
           </span>
         </div>
 
-        <div className={styles.identity}>
+       <div className={styles.identity}> 
           <h3 className={styles.name}>{player.nome}</h3>
+
+          {/* Linha 1: Time */}
           <div className={styles.meta}>
             <span>{player.time}</span>
-            <span className={styles.dot}>·</span>
-            <Flag code={LEAGUE_CODE[liga]} height="11" style={{ borderRadius: 2 }} fallback={<span className={styles.leagueBadge}>{LEAGUE_FLAGS[liga]}</span>}/>
-            <span>{liga}</span>
           </div>
+
+          {/* Linha 2: País */}
+          <div className={styles.country}>
+            {birthCountryCode ? (
+              <Flag code={birthCountryCode} height="11" style={{ borderRadius: 2 }} />
+            ) : (
+              <span className={styles.country}>{birthCountryName || '—'}</span>
+            )}
+            <span>{birthCountryName || player.nacionalidade || 'Sem país informado'}</span>
+          </div>
+
           {player.idade && Number(player.idade) > 0 && (
-            <div className={styles.age}>{player.idade} anos · {player.nacionalidade}</div>
+            <div className={styles.age}>{player.idade} anos</div>
           )}
         </div>
       </div>

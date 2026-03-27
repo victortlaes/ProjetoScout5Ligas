@@ -67,6 +67,23 @@
   transform: translateY(0);
 }
 
+/* Visual de comparação dentro do relatório */
+.compareLayout {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 24px 24px 16px;
+}
+
+.radarWrap {
+  flex: 1;
+  min-width: 300px;
+  max-width: 430px;
+}
+
 /* Corpo do relatório */
 .reportBody {
   padding: 32px;
@@ -234,4 +251,17 @@
   font-size: 14px;
   line-height: 1.75;
   color: var(--text-secondary);
+}
+
+@media (max-width: 1100px) {
+  .compareLayout {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .radarWrap {
+    min-width: 0;
+    max-width: none;
+  }
 }

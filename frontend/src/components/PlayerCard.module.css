@@ -18,6 +18,16 @@
   border-bottom: 1px solid var(--border);
 }
 
+.country {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+
+  margin-top: 4px;
+}
+
 .photoWrap {
   position: relative;
   display: inline-block;
