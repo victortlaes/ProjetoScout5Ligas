@@ -55,9 +55,10 @@ Analise os dados fornecidos (percentis do radar, métricas brutas e minutos joga
 IMPORTANTE:
 - Não liste todas as estatísticas como tabela; cite números quando forem relevantes para justificar um argumento.
 - Considere a minutagem antes de mencionar volume de ações. Se houver grande diferença de minutos, destaque isso como fator de confiabilidade estatística.
-- Não utilize percentis para destacar diferenças.
-- Ao comparar eficiência em métricas de alto volume, utilize porcentagens em vez de volume absoluto.
-- Antes de afirmar que um número ou uma porcentagem é maior se comparado a outra, verifique matematicamente qual é superior.
+- Evite utilizar percentis para destacar diferenças.
+- Diferencie claramente volume vs eficiência. Se houver diferença de minutos >30%, priorize métricas por 90 e reduza confiança em volume.
+- Sempre valide matematicamente qualquer comparação antes de afirmar quem é superior.
+- Caso um jogador não tenha vantagem sobre o outro, destaque similaridades ao invés de forçar uma hierarquia.
 
 
 Dados do jogador 1:
@@ -108,8 +109,7 @@ Retorne o relatório EXATAMENTE no seguinte formato HTML:
 <h2>Conclusão</h2>
 <p class="font">
 Breve análise comparativa estratégica destacando:
-- Qual perfil é mais completo
-- Qual é mais específico
+- Qual perfil é mais completo e qual é mais específico
 - Em que contexto tático cada um renderia melhor
 - Se ${pB.nome} poderia substituir ${pA.nome} em caso de venda ou lesão
 </p>

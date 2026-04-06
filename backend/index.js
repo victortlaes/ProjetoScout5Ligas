@@ -6,6 +6,7 @@ import compareRoutes from './routes/compare.js';
 import scoutsRoutes from './routes/scouts.js';
 import similarRoutes from './routes/similar.js';
 import aiCompareRoutes from './routes/aiCompare.js';
+import scoutMarketRoutes from './routes/scout-market.js';
 
 
 import db from './db.js';
@@ -21,6 +22,7 @@ app.use('/scouts', scoutsRoutes);
 app.use('/compare', compareRoutes);
 app.use('/similar', similarRoutes);
 app.use('/ai-compare', aiCompareRoutes);
+app.use('/scout-market', scoutMarketRoutes);
 
 
 db.all('SELECT * FROM scouts', [], (err, rows) => {

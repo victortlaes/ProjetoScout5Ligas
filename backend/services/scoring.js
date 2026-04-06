@@ -37,7 +37,7 @@ export function buildCreationRaw(player) {
   const raw =
     per90(player.expectedAssists, minutes) * 0.1 +
     per90(player.bigChanceCreated, minutes) * 0.4 +
-    per90(player.goalAssist, minutes) * 0.5
+    per90(player.goalAssist, minutes) * 0.5 +
     crossAccuracy * 0.1;
    
 /* if (player.nome ==="Reinaldo" || player.nome === "Enzo Díaz" || player.nome === "Matheus Pereira" || player.nome === "Giorgian De Arrascaeta"){ 
