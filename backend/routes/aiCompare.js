@@ -109,12 +109,12 @@ Retorne o relatório EXATAMENTE no seguinte formato HTML:
 <h2>Conclusão</h2>
 <p class="font">
 Breve análise comparativa estratégica destacando:
-- Qual perfil é mais completo e qual é mais específico
-- Em que contexto tático cada um renderia melhor
+- Em quais aspectos cada jogador se destaca (com base nos dados, sem generalizações)
+- Em que contextos táticos cada um tende a render melhor (relacionando diretamente com seus pontos fortes)
 - Se ${pB.nome} poderia substituir ${pA.nome} em caso de venda ou lesão
 </p>
 
-Seja técnico, objetivo e estratégico.
+Seja técnico, objetivo e estratégico e evite suposições não suportadas pelos números.
 `;
 
 console.log(prompt);
