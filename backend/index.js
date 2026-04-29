@@ -13,6 +13,7 @@ import db from './db.js';
 import { buildRawCache } from './services/rawCache.js';
 import { buildRadarCache } from './services/rawCache.js';
 
+const PORT = process.env.PORT || 3001;
 
 const app = express();
 app.use(cors());
@@ -42,6 +43,8 @@ db.all('SELECT * FROM scouts', [], (err, rows) => {
   buildRadarCache(rows); // 🔥 UMA VEZ
 });
 
-app.listen(3001, () => {
-  console.log('🚀 Backend rodando na porta 3001');
+
+
+app.listen(PORT, () => {
+  console.log(`🚀 rodando na porta ${PORT}`);
 });
