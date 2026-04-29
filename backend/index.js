@@ -16,7 +16,6 @@ import { buildRadarCache } from './services/rawCache.js';
 const PORT = process.env.PORT || 3001;
 
 const app = express();
-app.use(cors());
 app.use(express.json());
 
 app.use('/scouts', scoutsRoutes);
@@ -24,6 +23,10 @@ app.use('/compare', compareRoutes);
 app.use('/similar', similarRoutes);
 app.use('/ai-compare', aiCompareRoutes);
 app.use('/scout-market', scoutMarketRoutes);
+
+app.use(cors({
+  origin: '*'
+}));
 
 
 db.all('SELECT * FROM scouts', [], (err, rows) => {
@@ -42,8 +45,6 @@ db.all('SELECT * FROM scouts', [], (err, rows) => {
 
   buildRadarCache(rows); // 🔥 UMA VEZ
 });
-
-
 
 app.listen(PORT, () => {
   console.log(`🚀 rodando na porta ${PORT}`);
