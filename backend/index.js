@@ -18,15 +18,16 @@ const PORT = process.env.PORT || 3001;
 const app = express();
 app.use(express.json());
 
+app.use(cors({
+  origin: '*'
+}));
+
+
 app.use('/scouts', scoutsRoutes);
 app.use('/compare', compareRoutes);
 app.use('/similar', similarRoutes);
 app.use('/ai-compare', aiCompareRoutes);
 app.use('/scout-market', scoutMarketRoutes);
-
-app.use(cors({
-  origin: '*'
-}));
 
 
 db.all('SELECT * FROM scouts', [], (err, rows) => {
