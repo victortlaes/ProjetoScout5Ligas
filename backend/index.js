@@ -47,21 +47,6 @@ db.all('SELECT * FROM scouts', [], (err, rows) => {
   buildRadarCache(rows); // 🔥 UMA VEZ
 });
 
-app.get('/proxy-image/:id', async (req, res) => {
-  try {
-    const url = `https://sofascore.com/api/v1/player/${req.params.id}/image`;
-
-    const response = await fetch(url);
-    const buffer = await response.arrayBuffer();
-
-    res.set('Content-Type', 'image/png');
-    res.send(Buffer.from(buffer));
-  } catch (e) {
-    console.error(e);
-    res.status(500).send('Erro imagem');
-  }
-});
-
 
 app.listen(PORT, () => {
   console.log(`🚀 rodando na porta ${PORT}`);
