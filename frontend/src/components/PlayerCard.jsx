@@ -29,7 +29,7 @@ export default function PlayerCard({ player, color = '#1d6ef5' }) {
       <div className={styles.cardTop}>
         <div className={styles.photoWrap}>
           <img
-            src={`${API}/proxy-image/${player.player_id}`}
+            src={player.url_foto}
             alt={player.nome}
             className={styles.photo}
             onError={e => {

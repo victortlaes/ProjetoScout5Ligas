@@ -11,7 +11,7 @@ import { getLeague } from './utils/leagueMap';
 import { resolveBirthCountryCode } from './utils/countryFlag';
 import styles from './App.module.css';
 
-const API = import.meta.env.VITE_API_URL;
+const API = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 
 const DEFAULT_FILTERS = {
