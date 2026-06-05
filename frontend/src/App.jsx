@@ -9,6 +9,7 @@ import SimilarPlayerCard from './components/SimilarPlayerCard';
 import ScoutMarket from './components/ScoutMarket';
 import { getLeague } from './utils/leagueMap';
 import { resolveBirthCountryCode } from './utils/countryFlag';
+import { getPlayerPhotoUrl } from './utils/playerPhoto';
 import styles from './App.module.css';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3001';
@@ -71,7 +72,7 @@ export default function App() {
         label: p.nome,
         time:  p.time,
         posicao: p.posicao,
-        foto:  p.url_foto,
+        foto:  getPlayerPhotoUrl(p.player_id),
         idade: p.idade,
         birthCountryCode: resolveBirthCountryCode(p),
       }))
@@ -87,7 +88,7 @@ export default function App() {
         label:   p.nome,
         time:    p.time,
         posicao: p.posicao,
-        foto:    p.url_foto,
+        foto:    getPlayerPhotoUrl(p.player_id),
         idade:   p.idade,
         birthCountryCode: resolveBirthCountryCode(p),
       }))

@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import PlayerCard from './PlayerCard';
+import { getPlayerPhotoUrl } from '../utils/playerPhoto';
 import RadarComparison from './RadarComparison';
 import styles from './AIReport.module.css';
 
@@ -52,7 +53,7 @@ export default function AIReport({
           ${comparePlayers.map((p, idx) => `
             <div class="player-card">
               <div class="pc-head">
-                <img class="pc-photo" src="${p.url_foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.nome || `Jogador ${idx + 1}`)}&background=e8f0fe&color=1d6ef5&size=120`}" alt="${p.nome || `Jogador ${idx + 1}`}" />
+                <img class="pc-photo" src="${getPlayerPhotoUrl(p.player_id) || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.nome || `Jogador ${idx + 1}`)}&background=e8f0fe&color=1d6ef5&size=120`}" alt="${p.nome || `Jogador ${idx + 1}`}" />
                 <div>
                   <div class="pc-name">${p.nome || `Jogador ${idx + 1}`}</div>
                   <div class="pc-meta">${p.time || '—'} · ${p.posicao || '—'}</div>

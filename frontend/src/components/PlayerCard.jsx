@@ -1,4 +1,5 @@
 import { resolveBirthCountryCode, resolveBirthCountryName } from '../utils/countryFlag';
+import { getPlayerPhotoUrl } from '../utils/playerPhoto';
 import Flag from 'react-world-flags';
 import styles from './PlayerCard.module.css';
 
@@ -29,7 +30,7 @@ export default function PlayerCard({ player, color = '#1d6ef5' }) {
       <div className={styles.cardTop}>
         <div className={styles.photoWrap}>
           <img
-            src={player.url_foto}
+            src={getPlayerPhotoUrl(player.player_id)}
             alt={player.nome}
             className={styles.photo}
             onError={e => {

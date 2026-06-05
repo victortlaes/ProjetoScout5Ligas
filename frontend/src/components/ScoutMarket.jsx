@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getLeague, LEAGUE_FLAGS, ALL_LEAGUES } from '../utils/leagueMap';
+import { getPlayerPhotoUrl } from '../utils/playerPhoto';
 import Flag from 'react-world-flags';
 import styles from './ScoutMarket.module.css';
 
@@ -124,7 +125,7 @@ function ResultCard({ player, rank, radarValues, radarLabels }) {
       <div className={styles.resultRank}>#{rank}</div>
 
       <img
-        src={player.url_foto}
+        src={getPlayerPhotoUrl(player.player_id)}
         alt={player.nome}
         className={styles.resultPhoto}
         onError={e => {

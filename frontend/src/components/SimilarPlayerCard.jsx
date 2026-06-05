@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { getLeague, LEAGUE_FLAGS } from '../utils/leagueMap';
+import { getPlayerPhotoUrl } from '../utils/playerPhoto';
 import Flag from 'react-world-flags';
 import styles from './SimilarPlayerCard.module.css';
 
@@ -69,7 +70,7 @@ export default function SimilarPlayerCard({ player, rank, baseRadar, onCompare }
     <div className={`${styles.card} ${expanded ? styles.expanded : ''}`}>
       <div className={styles.mainRow}>
         <div className={styles.rank}>#{rank}</div>
-        <img src={player.url_foto} alt={player.nome} className={styles.photo}
+        <img src={getPlayerPhotoUrl(player.player_id)} alt={player.nome} className={styles.photo}
           onError={e => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(player.nome)}&background=e8f0fe&color=1d6ef5&size=80`; }}/>
         <div className={styles.info}>
           <div className={styles.name}>{player.nome}</div>
