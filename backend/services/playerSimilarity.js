@@ -36,6 +36,7 @@ export function findSimilarPlayers(targetPlayer, universo, topN = 5) {
         nome: p.nome,
         time: p.time,
         posicao: p.posicao,
+        idade: p.idade,
         url_foto: p.url_foto,
         similaridade,
         distancia,
