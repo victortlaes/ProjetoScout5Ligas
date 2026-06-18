@@ -12,7 +12,7 @@ import { resolveBirthCountryCode } from './utils/countryFlag';
 import { getPlayerPhotoUrl } from './utils/playerPhoto';
 import styles from './App.module.css';
 
-const API = 'http://localhost:3001';
+const API = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 
 const DEFAULT_FILTERS = {
