@@ -104,7 +104,7 @@ export default function PlayerSelect({ options, value, onChange, placeholder, is
       styles={customStyles}
       isClearable
       isDisabled={isDisabled}
-      noOptionsMessage={() => 'Nenhum jogador encontrado'}
+      noOptionsMessage={() => 'Carregando...'}
       loadingMessage={() => 'Carregando...'}
     />
   );

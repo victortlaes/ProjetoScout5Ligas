@@ -83,6 +83,11 @@ export default function SimilarPlayerCard({ player, rank, baseRadar, onCompare }
             <Flag code={LEAGUE_CODE[liga]} height="11" style={{ borderRadius: 2 }}
               fallback={<span className={styles.leagueBadge}>{LEAGUE_FLAGS[liga]}</span>}/>
             <span>{liga}</span>
+              <>
+                <span className={styles.dot}>·</span>
+                <span>{player.idade} anos</span>
+              </>
+            
           </div>
         </div>
         <SimilarityRing pct={player.similaridade} />

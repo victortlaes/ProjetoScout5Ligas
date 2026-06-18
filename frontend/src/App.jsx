@@ -12,7 +12,7 @@ import { resolveBirthCountryCode } from './utils/countryFlag';
 import { getPlayerPhotoUrl } from './utils/playerPhoto';
 import styles from './App.module.css';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API = 'http://localhost:3001';
 
 
 const DEFAULT_FILTERS = {
@@ -231,7 +231,10 @@ export default function App() {
               <div>
                 <h1 className={styles.pageTitle}>Comparação de Jogadores</h1>
                 <p className={styles.pageSubtitle}>
-                  Selecione dois jogadores para comparar via radar de percentis e análise IA
+                  Selecione dois jogadores para comparar via radar de percentis e análise com IA
+                </p>
+                <p className={styles.pageSubtitle}>
+                  📊 Como ler o radar: os valores representam percentis. Um percentil 99 significa que o jogador teve desempenho superior a 99% dos atletas da base nas estatísticas analisadas. A análise com IA é gerada com base nessas métricas.
                 </p>
               </div>
               <div className={styles.resultCount}>
@@ -337,7 +340,10 @@ export default function App() {
               <div>
                 <h1 className={styles.pageTitle}>Buscar Jogadores Similares</h1>
                 <p className={styles.pageSubtitle}>
-                  Selecione um jogador — os resultados atualizam automaticamente conforme os filtros
+                  Selecione um jogador — utilize filtros para obter melhores resultados
+                </p>
+                <p className={styles.pageSubtitle}>
+                  📊 Como ler a similaridade: o percentual indica o quão próximo estatisticamente o desempenho de um jogador está do atleta selecionado.  
                 </p>
               </div>
             </div>
