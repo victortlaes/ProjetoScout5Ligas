@@ -2,3 +2,5 @@ node_modules/
 .env
 dist/
 build/
+# Backups dos bancos de dados
+/backend/backup_db/
