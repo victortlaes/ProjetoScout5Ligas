@@ -4,3 +4,4 @@ dist/
 build/
 # Backups dos bancos de dados
 /backend/backup_db/
+*.py

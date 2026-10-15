@@ -18,7 +18,7 @@ const LEAGUE_CODE = {
   'MLS': 'USA',
 };
 
-export default function FilterBar({ filters, setFilters }) {
+export default function FilterBar({ filters, setFilters, availableSeasons = ['2025', '2026'] }) {
   const [ageOpen, setAgeOpen] = useState(false);
 
   function toggleLeague(liga) {
@@ -33,6 +33,10 @@ export default function FilterBar({ filters, setFilters }) {
 
   function setPos(pos) {
     setFilters(f => ({ ...f, position: pos }));
+  }
+
+  function setSeason(season) {
+    setFilters(f => ({ ...f, season }));
   }
 
   function setAge(key, val) {
@@ -50,6 +54,25 @@ export default function FilterBar({ filters, setFilters }) {
 
   return (
     <div className={styles.bar}>
+      {/* Temporada */}
+      <div className={styles.group}>
+        <span className={styles.label}>Temporada</span>
+        <div className={styles.pills}>
+          {availableSeasons.map(year => (
+            <button
+              key={year}
+              type="button"
+              className={`${styles.pill} ${filters.season === year ? styles.active : ''}`}
+              onClick={() => setSeason(year)}
+            >
+              {year}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className={styles.divider} />
+
       {/* Liga */}
       <div className={styles.group}>
         <span className={styles.label}>Liga</span>

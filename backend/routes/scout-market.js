@@ -5,6 +5,7 @@ import calcularRadar from '../services/radarCalculator.js';
 import radarConfig from '../services/radarMetrics.js';
 import { buildRawCache, buildRadarCache } from '../services/rawCache.js';
 import { getLeague as getLeagueFromMap } from '../utils/leagueMap.js';
+import { DEFAULT_SEASON, filterScoutsBySeason } from '../services/season.js';
 
 const router = express.Router();
 
@@ -30,7 +31,8 @@ router.get('/', (req, res) => {
     passe,
     progressao,
     duelo,
-    defesa
+    defesa,
+    season
   } = req.query;
 
   const leagueFilter = leagues ? leagues.split(',').map(l => l.trim()) : [];
@@ -48,8 +50,10 @@ router.get('/', (req, res) => {
     defesa:      Number(defesa      || 0),
   };
 
-  db.all(`SELECT * FROM scouts WHERE posicao != 'G'`, [], (err, base) => {
+  db.all(`SELECT * FROM scouts WHERE posicao != 'G'`, [], (err, all) => {
     if (err) return res.status(500).json(err);
+
+    const base = filterScoutsBySeason(all, season || DEFAULT_SEASON);
 
     buildRawCache(base);
     buildRadarCache(base);

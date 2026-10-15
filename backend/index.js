@@ -10,8 +10,8 @@ import scoutMarketRoutes from './routes/scout-market.js';
 
 
 import db from './db.js';
-import { buildRawCache } from './services/rawCache.js';
-import { buildRadarCache } from './services/rawCache.js';
+import { buildRawCache, buildRadarCache } from './services/rawCache.js';
+import { DEFAULT_SEASON, filterScoutsBySeason } from './services/season.js';
 
 const PORT = process.env.PORT || 3001;
 
@@ -33,18 +33,20 @@ app.use('/scout-market', scoutMarketRoutes);
 db.all('SELECT * FROM scouts', [], (err, rows) => {
   if (err) throw err;
 
-  global.UNIVERSO = rows;
-
-  buildRawCache(rows); // 🔥 cache pré-calculado
-});
-
-
-db.all('SELECT * FROM scouts', [], (err, rows) => {
-  if (err) throw err;
-
-  global.UNIVERSO = rows;
-
-  buildRadarCache(rows); // 🔥 UMA VEZ
+  db.all(
+    `SELECT DISTINCT temporada FROM scouts
+     WHERE temporada IS NOT NULL AND trim(temporada) != ''
+     ORDER BY temporada DESC`,
+    [],
+    (err2, seasonRows) => {
+      if (err2) throw err2;
+      const latest = seasonRows[0]?.temporada || DEFAULT_SEASON;
+      const universo = filterScoutsBySeason(rows, latest);
+      global.UNIVERSO = universo;
+      buildRawCache(universo);
+      buildRadarCache(universo);
+    }
+  );
 });
 
 

@@ -10,12 +10,15 @@ import ScoutMarket from './components/ScoutMarket';
 import { getLeague } from './utils/leagueMap';
 import { resolveBirthCountryCode } from './utils/countryFlag';
 import { getPlayerPhotoUrl } from './utils/playerPhoto';
+import { playersForSeason } from './utils/playerSeason';
 import styles from './App.module.css';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+//const API = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API = 'http://localhost:3001';
 
 
 const DEFAULT_FILTERS = {
+  season:   '2025',
   leagues:  [],
   position: '',
   age:      { min: 15, max: 44 },
@@ -23,6 +26,7 @@ const DEFAULT_FILTERS = {
 
 export default function App() {
   const [players, setPlayers]           = useState([]);
+  const [availableSeasons, setAvailableSeasons] = useState(['2025', '2026']);
   const [view, setView]                 = useState('compare');
 
   // Filtros
@@ -48,17 +52,34 @@ export default function App() {
   const [loadingSimilar, setLoadingSimilar] = useState(false);
   const similarRequestSeq = useRef(0);
 
-  // Carregar jogadores
+  // Carregar jogadores e temporadas
   useEffect(() => {
-    fetch(`${API}/scouts`)
-      .then(r => r.json())
-      .then(setPlayers)
+    Promise.all([
+      fetch(`${API}/scouts/seasons`).then(r => r.json()),
+      fetch(`${API}/scouts`).then(r => r.json()),
+    ])
+      .then(([seasons, rows]) => {
+        if (Array.isArray(seasons) && seasons.length) {
+          setAvailableSeasons(seasons);
+          setFilters(f => ({
+            ...f,
+            season: seasons.includes(f.season) ? f.season : seasons[0],
+          }));
+        }
+        setPlayers(rows);
+      })
       .catch(console.error);
   }, []);
 
+  // Uma entrada por jogador na temporada ativa (sem duplicar 2025/2026 no select)
+  const seasonRoster = useMemo(
+    () => playersForSeason(players, filters.season),
+    [players, filters.season]
+  );
+
   // Opções filtradas para os dropdowns (sem goleiros)
   const filteredOptions = useMemo(() => {
-    return players
+    return seasonRoster
       .filter(p => {
         if (p.posicao === 'G') return false;
         if (filters.position && p.posicao !== filters.position) return false;
@@ -77,11 +98,11 @@ export default function App() {
         birthCountryCode: resolveBirthCountryCode(p),
       }))
       .sort((a, b) => a.label.localeCompare(b.label));
-  }, [players, filters]);
+  }, [seasonRoster, filters]);
 
   // Opções similares (inclui todas as posições mas não G)
   const allOptions = useMemo(() => {
-    return players
+    return seasonRoster
       .filter(p => p.posicao !== 'G')
       .map(p => ({
         value:   p.player_id,
@@ -93,11 +114,11 @@ export default function App() {
         birthCountryCode: resolveBirthCountryCode(p),
       }))
       .sort((a, b) => a.label.localeCompare(b.label));
-  }, [players]);
+  }, [seasonRoster]);
 
-  // Jogador completo para o card
+  // Jogador completo para o card (temporada ativa)
   function getPlayer(id) {
-    return players.find(p => p.player_id == id) || null;
+    return seasonRoster.find(p => p.player_id == id) || null;
   }
 
   // Compare
@@ -108,7 +129,7 @@ export default function App() {
     setFollowUp('');
     setFollowUpAnswer(null);
 
-    fetch(`${API}/compare?a=${playerA}&b=${playerB}`)
+    fetch(`${API}/compare?a=${playerA}&b=${playerB}&season=${encodeURIComponent(filters.season)}`)
       .then(r => r.json())
       .then(data => { setCompareData(data); setLoadingCompare(false); })
       .catch(() => setLoadingCompare(false));
@@ -128,7 +149,7 @@ export default function App() {
     setLoadingAI(true);
     setFollowUpAnswer(null);
 
-    fetch(`${API}/ai-compare?a=${playerA}&b=${playerB}`)
+    fetch(`${API}/ai-compare?a=${playerA}&b=${playerB}&season=${encodeURIComponent(filters.season)}`)
       .then(async r => {
         const data = await r.json();
         if (!r.ok) {
@@ -176,7 +197,10 @@ export default function App() {
     setLoadingSimilar(true);
 
     // Monta query com filtros ativos
-    const params = new URLSearchParams({ a: similarPlayer });
+    const params = new URLSearchParams({
+      a: similarPlayer,
+      season: filters.season,
+    });
     if (filters.leagues.length > 0)  params.set('leagues', filters.leagues.join(','));
     if (filters.position)             params.set('position', filters.position);
     if (filters.age.min > 15)         params.set('ageMin', filters.age.min);
@@ -200,6 +224,18 @@ export default function App() {
     return () => controller.abort();
   }, [similarPlayer, filters]);
 
+  function handleSimilarPlayerChange(id) {
+    setSimilarPlayer(id);
+    if (!id) {
+      setFilters(f => ({ ...f, position: '' }));
+      return;
+    }
+    const p = getPlayer(id);
+    if (p?.posicao && p.posicao !== 'G') {
+      setFilters(f => ({ ...f, position: p.posicao }));
+    }
+  }
+
   // Navega para comparação pré-selecionando jogador base + similar
   function handleCompareFromSimilar(similarId) {
     setPlayerA(similarPlayer);
@@ -218,7 +254,11 @@ export default function App() {
   return (
     <div className={styles.layout}>
       <Header view={view} setView={setView} />
-      <FilterBar filters={filters} setFilters={setFilters} />
+      <FilterBar
+        filters={filters}
+        setFilters={setFilters}
+        availableSeasons={availableSeasons}
+      />
 
       <main className={styles.main}>
 
@@ -353,7 +393,7 @@ export default function App() {
                 <PlayerSelect
                   options={allOptions}
                   value={similarPlayer}
-                  onChange={setSimilarPlayer}
+                  onChange={handleSimilarPlayerChange}
                   placeholder="Selecionar jogador base..."
                 />
               </div>

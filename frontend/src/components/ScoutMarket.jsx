@@ -186,7 +186,7 @@ export default function ScoutMarket({ filters, setFilters }) {
   const [searched,   setSearched]     = useState(false);
 
   // Filtros de liga/posição/idade herdados do FilterBar global
-  const { leagues, position, age } = filters;
+  const { leagues, position, age, season } = filters;
 
   const runSearch = useCallback(() => {
     setLoading(true);
@@ -199,17 +199,18 @@ export default function ScoutMarket({ filters, setFilters }) {
     if (position)                params.set('position',  position);
     if (age.min > 15)            params.set('ageMin',    age.min);
     if (age.max < 44)            params.set('ageMax',    age.max);
+    if (season)                  params.set('season',    season);
 
     fetch(`http://localhost:3001/scout-market?${params}`)
       .then(r => r.json())
       .then(data => { setResults(data.results || []); setLoading(false); })
       .catch(() => setLoading(false));
-  }, [percentils, maxMarket, leagues, position, age]);
+  }, [percentils, maxMarket, leagues, position, age, season]);
 
   // Re-busca automática quando filtros globais mudam (se já buscou antes)
   useEffect(() => {
     if (searched) runSearch();
-  }, [leagues, position, age]);
+  }, [leagues, position, age, season]);
 
   function updatePercentil(key, val) {
     setPercentils(p => ({ ...p, [key]: val }));

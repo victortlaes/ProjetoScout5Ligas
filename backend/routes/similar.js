@@ -4,11 +4,12 @@ import db from '../db.js';
 import { findSimilarPlayers } from '../services/playerSimilarity.js';
 import { buildRawCache, buildRadarCache, getRadar } from '../services/rawCache.js';
 import { getLeague } from '../utils/leagueMap.js';
+import { DEFAULT_SEASON, filterScoutsBySeason, findPlayerInSeason } from '../services/season.js';
 
 const router = express.Router();
 
 router.get('/', (req, res) => {
-  const { a, leagues, position, ageMin, ageMax } = req.query;
+  const { a, leagues, position, ageMin, ageMax, season } = req.query;
 
   if (!a) {
     return res.status(400).json({ error: 'ID do jogador é obrigatório' });
@@ -23,15 +24,16 @@ router.get('/', (req, res) => {
   db.all(
     `SELECT * FROM scouts WHERE posicao != 'G'`,
     [],
-    (err, base) => {
+    (err, all) => {
       if (err) return res.status(500).json(err);
+
+      const base = filterScoutsBySeason(all, season || DEFAULT_SEASON);
 
       // Garante caches atualizados antes de calcular similaridade
       buildRawCache(base);
       buildRadarCache(base);
 
-      // O jogador alvo é buscado no universo completo (sem filtro)
-      const player = base.find(p => p.player_id == a);
+      const player = findPlayerInSeason(base, a, season || DEFAULT_SEASON);
       if (!player) {
         return res.status(404).json({ error: 'Jogador não encontrado' });
       }

@@ -3,6 +3,7 @@ import db from '../db.js';
 import radarConfig from '../services/radarMetrics.js';
 import calcularRadar from '../services/radarCalculator.js';
 import OpenAI from 'openai';
+import { DEFAULT_SEASON, filterScoutsBySeason, findPlayerInSeason } from '../services/season.js';
 
 const router = express.Router();
 
@@ -11,17 +12,18 @@ const openai = new OpenAI({
 });
 
 router.get('/', async (req, res) => {
-  const { a, b } = req.query;
+  const { a, b, season } = req.query;
 
   if (!a || !b) {
     return res.status(400).json({ error: 'IDs obrigatórios' });
   }
 
-  db.all(`SELECT * FROM scouts WHERE posicao != 'G'`, [], async (err, base) => {
+  db.all(`SELECT * FROM scouts WHERE posicao != 'G'`, [], async (err, all) => {
     if (err) return res.status(500).json(err);
 
-    const pA = base.find(p => p.player_id == a);
-    const pB = base.find(p => p.player_id == b);
+    const base = filterScoutsBySeason(all, season || DEFAULT_SEASON);
+    const pA = findPlayerInSeason(base, a, season || DEFAULT_SEASON);
+    const pB = findPlayerInSeason(base, b, season || DEFAULT_SEASON);
 
     if (!pA || !pB) {
       return res.status(404).json({ error: 'Jogador não encontrado' });

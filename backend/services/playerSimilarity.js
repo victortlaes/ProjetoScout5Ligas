@@ -14,11 +14,16 @@ export function findSimilarPlayers(targetPlayer, universo, topN = 5) {
   const targetVector = getRadar(targetPlayer.player_id);
   if (!Array.isArray(targetVector) || targetVector.length === 0) return [];
 
+  const targetTeam = (targetPlayer.time ?? '').trim().toLowerCase();
+
   const similares = universo
-    .filter(p =>
-      p.player_id !== targetPlayer.player_id &&
-      getMinutes(p) >= 500
-    )
+    .filter(p => {
+      if (p.player_id === targetPlayer.player_id) return false;
+      if (getMinutes(p) < 500) return false;
+      const team = (p.time ?? '').trim().toLowerCase();
+      if (targetTeam && team && team === targetTeam) return false;
+      return true;
+    })
     .map(p => {
       const vector = getRadar(p.player_id);
       if (!Array.isArray(vector) || vector.length !== targetVector.length) return null;
